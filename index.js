@@ -17,20 +17,22 @@ morgan.token('body',(req,res)=>{
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
-let blog_list=[]
+//let blog_list=[]
 
 app.get('/api/blogs', (request, response) => {
   Blog.find({}).then((blogs) => {
-    blog_list = blogs
     response.json(blogs)
   })
 })
 
-app.post('/api/blogs', (request, response) => {
+app.post('/api/blogs', async (request, response,next) => {
+  const title = request.body.title
+  console.log(`post request body ${request.body.title}`)
   const blog = new Blog(request.body)
-  const title = blog.title
-
-  if(blog_list.find(b => b.title === blog.title)){
+  
+  const existingBlog = await Blog.findOne({title: title})
+  console.log(`existing blog ${existingBlog}`)
+  if(existingBlog){
     return response.status(409).send({error: "Blog already exists"})
   }
 
