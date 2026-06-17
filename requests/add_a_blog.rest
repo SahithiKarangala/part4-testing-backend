@@ -2,7 +2,7 @@ POST http://localhost:3003/api/blogs
 Content-Type: application/json
 
 {
-    "title": "Hello-world-programming-language",
+    "title": "Hello-world-programming-language-test-1",
     "author": "Jim Carter",
     "url": "jim-carter-a-well-known-tech-writer",
     "likes": 73
