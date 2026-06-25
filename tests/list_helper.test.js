@@ -1,5 +1,12 @@
-const {test,describe} = require('node:test')
+const {test,describe,beforeEach, after} = require('node:test')
 const assert = require('node:assert')
+
+const mongoose = require('mongoose')
+const supertest = require('supertest')
+
+const app = require('../app')
+const Blog = require('../models/blogSchema')
+const api = supertest(app)
 
 const listHelper = require('../utils/list_helper.js') 
 
@@ -8,6 +15,15 @@ test('dummy function returns 1',()=>{
 
     const result = listHelper.dummy(blogs)
     assert.strictEqual(result,1)
+})
+
+test.only('All blogs are returned in JSON format', async()=>{
+    const result = await api.get('/api/blogs')
+    assert.strictEqual(result.body.length, 9)
+    //await api 
+    //.get('/api/blogs')
+    //.expect(200)
+    //.expect('Content-Type',/application\/json/)
 })
 
 describe('total likes',()=>{
@@ -328,4 +344,9 @@ describe('most likes',()=>{
         const result = listHelper.most_likes(listWithManyBlogs)
         assert.deepStrictEqual(result,{author: "Edsger W. Dijkstra", likes: 17})
     })  
+})
+
+
+after(async () => {
+  await mongoose.connection.close()
 })
