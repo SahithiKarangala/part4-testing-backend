@@ -25,6 +25,13 @@ test.only('All blogs are returned in JSON format', async()=>{
     //.expect(200)
     //.expect('Content-Type',/application\/json/)
 })
+test.only('All blogs have a property id', async () => {
+    const result = await api.get('/api/blogs')
+
+    for (const blog of result.body) {
+        assert.ok(Object.prototype.hasOwnProperty.call(blog, 'id'))
+    }
+})
 
 describe('total likes',()=>{
     const emptyBlog=[] 
