@@ -30,12 +30,24 @@ blogsRouter.post('/', async (request, response,next) => {
     return response.status(400).send({error: "Missing title or url property"})
   }
   // ---------
-  
+
   const blog = new Blog(request.body)
 
   blog.save().then((result) => {
     response.status(201).json(result)
   }).catch(error => next(error))
+})
+
+blogsRouter.delete('/:id',async(request,response,next)=>{
+    const id = request.params.id 
+    const blog_to_delete = await Blog.findById(id)
+
+    if(!blog_to_delete){
+        return response.status(404).send({error: "Blog not found"})
+    }
+    
+    await Blog.findByIdAndDelete(id)
+    response.status(204).end()
 })
 
 module.exports = blogsRouter
