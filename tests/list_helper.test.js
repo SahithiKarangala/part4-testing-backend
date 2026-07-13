@@ -224,6 +224,29 @@ describe('blog api', () => {
             assert.strictEqual(finalCount, initialCount + 1)
         })
     })
+
+    describe('deleting a blog', () => {
+        test('deleting an existing blog returns 204 and removes it', async () => {
+            const blogsAtStart = await api.get('/api/blogs')
+            const blogToDelete = blogsAtStart.body[0]
+
+            await api
+                .delete(`/api/blogs/${blogToDelete.id}`)
+                .expect(204)
+
+            const blogsAtEnd = await api.get('/api/blogs')
+            const blogIds = blogsAtEnd.body.map(blog => blog.id)
+
+            assert.strictEqual(blogsAtEnd.body.length, blogsAtStart.body.length - 1)
+            assert.ok(!blogIds.includes(blogToDelete.id))
+        })
+
+        test('deleting a blog with a non-existing id returns 404', async () => {
+            await api
+                .delete('/api/blogs/000000000000000000000000')
+                .expect(404)
+        })
+    })
 })
 
 after(async () => {
