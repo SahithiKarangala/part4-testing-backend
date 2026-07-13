@@ -247,6 +247,48 @@ describe('blog api', () => {
                 .expect(404)
         })
     })
+
+    describe('updating a blog', () => {
+        test('updating an existing blog returns 200 and updates fields', async () => {
+            const blogsAtStart = await api.get('/api/blogs')
+            const blogToUpdate = blogsAtStart.body[0]
+
+            const updatedData = {
+                title: 'Updated Title',
+                author: blogToUpdate.author,
+                url: 'https://updated.example.com/',
+                likes: 42
+            }
+
+            const response = await api
+                .put(`/api/blogs/${blogToUpdate.id}`)
+                .send(updatedData)
+                .expect(200)
+
+            assert.strictEqual(response.body.title, updatedData.title)
+            assert.strictEqual(response.body.url, updatedData.url)
+            assert.strictEqual(response.body.likes, updatedData.likes)
+        })
+
+        test('updating a non-existing id returns 404', async () => {
+            const nonExistingId = new mongoose.Types.ObjectId().toString()
+
+            await api
+                .put(`/api/blogs/${nonExistingId}`)
+                .send({ title: 'x', url: 'https://x' })
+                .expect(404)
+        })
+
+        test('updating with invalid payload missing title or url returns 400', async () => {
+            const blogsAtStart = await api.get('/api/blogs')
+            const blogToUpdate = blogsAtStart.body[0]
+
+            await api
+                .put(`/api/blogs/${blogToUpdate.id}`)
+                .send({ author: 'No Title/URL' })
+                .expect(400)
+        })
+    })
 })
 
 after(async () => {

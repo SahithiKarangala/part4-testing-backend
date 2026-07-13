@@ -50,4 +50,26 @@ blogsRouter.delete('/:id',async(request,response,next)=>{
     response.status(204).end()
 })
 
+blogsRouter.put('/:id', async (request, response, next) => {
+  const id = request.params.id
+  const updatedBlog = request.body
+
+  // Validate input: title and url are required
+  if (!updatedBlog.title || !updatedBlog.url) {
+    return response.status(400).send({ error: 'Title and url are required' })
+  }
+
+  const blog_to_update = await Blog.findById(id)
+  if (!blog_to_update) {
+    return response.status(404).send({ error: 'Blog not found' })
+  }
+
+  const updatedBlogResult = await Blog.findByIdAndUpdate(id, updatedBlog, {
+    new: true,
+    runValidators: true,
+  })
+
+  response.json(updatedBlogResult)
+})
+
 module.exports = blogsRouter
