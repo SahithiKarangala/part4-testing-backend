@@ -19,7 +19,7 @@ test('dummy function returns 1',()=>{
 
 test.only('All blogs are returned in JSON format', async()=>{
     const result = await api.get('/api/blogs')
-    assert.strictEqual(result.body.length, 9)
+    assert.strictEqual(result.body.length, 10)
     //await api 
     //.get('/api/blogs')
     //.expect(200)
@@ -31,6 +31,72 @@ test.only('All blogs have a property id', async () => {
     for (const blog of result.body) {
         assert.ok(Object.prototype.hasOwnProperty.call(blog, 'id'))
     }
+})
+
+describe('Creating a blog using post request',()=>{
+    const newBlogExample = {
+        title: "The-Daily-Stoic-5",  
+        author: "Ryan Holiday",
+        url: "https://dailystoic.com/",
+    }
+
+    const newExistingBlogExample = {
+        title: "The-Daily-Stoic-1",
+        author: "Ryan Holiday",
+        url: "https://dailystoic.com/"
+    }
+
+    const newBlogWithMissingTitleOrUrl = [
+        {
+            title: "The-Daily-Stoic-2", 
+            author: "Ryan Holiday"
+        },
+        {   author: "Ryan Holiday",
+            url: "https://dailystoic.com/"
+        },
+        {
+            title: "The-Daily-Stoic-4",
+        }
+    ]
+
+    test.only('creating a new blog with existing title returns 409', async () => {
+        const response = await api
+            .post('/api/blogs')
+            .send(newExistingBlogExample)
+            .expect(409)
+
+        assert.strictEqual(response.body.error, "Blog already exists")
+    })
+
+    test.only('creating a new blog with unique title returns 201', async () => {
+        const initialResponse = await api.get('/api/blogs')
+        const initialCount = initialResponse.body.length
+
+        const response = await api
+            .post('/api/blogs')
+            .send(newBlogExample)
+            .expect(201)
+
+        const finalResponse = await api.get('/api/blogs')
+        const finalCount = finalResponse.body.length
+
+        assert.strictEqual(response.body.title, newBlogExample.title)
+        assert.strictEqual(response.body.author, newBlogExample.author)
+        assert.strictEqual(response.body.url, newBlogExample.url)
+        assert.strictEqual(finalCount, initialCount + 1)
+        assert.strictEqual(response.body.likes, 0)
+    })
+
+    test.only('creating a new blog with missing title or url returns 400', async () => {
+        for (const blog of newBlogWithMissingTitleOrUrl) {
+            const response = await api
+                .post('/api/blogs')
+                .send(blog)
+                .expect(400)
+
+            assert.strictEqual(response.body.error, "Missing title or url property")
+        }
+    })
 })
 
 describe('total likes',()=>{

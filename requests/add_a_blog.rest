@@ -2,8 +2,7 @@ POST http://localhost:3003/api/blogs
 Content-Type: application/json
 
 {
-    "title": "From-Hello-world-first-programming-language",
+    "title": "first-programming-language-example-2",
     "author": "Jim Carter",
-    "url": "jim-carter-a-well-known-tech-writer",
-    "likes": 81
+    "url": "jim-carter-a-well-known-tech-writer"
 }
