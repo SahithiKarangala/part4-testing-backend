@@ -1,6 +1,16 @@
 const blogsRouter = require('express').Router() 
 const Blog = require('../models/blogSchema')
 const User = require('../models/userSchema')
+const jwt = require('jsonwebtoken')
+
+const getTokenFrom = request => {
+    const authorization = request.get('authorization')
+    if(authorization && authorization.startsWith('Bearer ')){
+        return authorization.replace('Bearer ',"")
+    }
+    return null
+}
+
 
 blogsRouter.get('/', async (request, response) => {
     const blog = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -11,6 +21,21 @@ blogsRouter.post('/', async (request, response,next) => {
 
     //check if a blog already exists with the same title, if yes return 409 conflict error
   const title = request.body.title
+
+  const token = getTokenFrom(request)
+  if (!token) {
+    return response.status(401).send({ error: 'token missing' })
+  }
+
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  if(!decodedToken.id){
+    return response.status(401).send({error: "Token missing or invalid"})
+  }
+
+  const user = await User.findById(decodedToken.id)
+  if(!user){
+    return response.status(401).send({error: "User not found"})
+  }
   
   const existingBlog = await Blog.findOne({title: title})
 
@@ -31,11 +56,11 @@ blogsRouter.post('/', async (request, response,next) => {
   }
   // ---------
 
-  const user = await User.findById(request.body.userId)
+  //const user = await User.findById(request.body.userId)
 
-  if(!user){
-    return response.status(400).send({error: "User not found"})
-  }
+  //if(!user){
+  //  return response.status(400).send({error: "User not found"})
+  //}
 
   const blog = new Blog({
     title: request.body.title,  

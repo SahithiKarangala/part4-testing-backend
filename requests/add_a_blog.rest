@@ -2,7 +2,7 @@ POST http://localhost:3003/api/blogs
 Content-Type: application/json
 
 {
-    "title": "first-programming-language-example-ritu-2-4",
+    "title": "first-programming-language-example-ritu-2-1-4",
     "author": "Jim Carter",
     "url": "jim-carter-a-well-known-tech-writer-ritu",
     "userId": "6a56eafe7bb2a976d3f78665"

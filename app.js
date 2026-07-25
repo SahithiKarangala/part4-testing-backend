@@ -18,7 +18,7 @@ mongoose.connect(config.MONGODB_URL, {family:4})
 .catch((error)=>{
     logger.error(`Error occured while connecting to mongoDB ${error}`)
 })
-
+app.use(middleware.tokenExtractor)
 app.use(express.json()) 
 app.use(middleware.requestLogger)
 
