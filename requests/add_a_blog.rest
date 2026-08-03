@@ -1,9 +1,9 @@
 POST http://localhost:3003/api/blogs 
 Content-Type: application/json
+Authorization : Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRhdmlkIiwiaWQiOiI2YTZlNmU1YzkyYTY0OTcxOTE2M2U2YzMiLCJpYXQiOjE3ODU2NDA5OTIsImV4cCI6MTc4NTY0NDU5Mn0.Vsv0uA0rAwhfyuMNDR8YNQC3haFuKdwS__QmgxnZzrw
 
 {
-    "title": "first-programming-language-example-ritu-2-1-4",
+    "title": "first-programming-language-example-david-2-3-4",
     "author": "Jim Carter",
-    "url": "jim-carter-a-well-known-tech-writer-ritu",
-    "userId": "6a56eafe7bb2a976d3f78665"
+    "url": "jim-carter-a-well-known-tech-writer-ritu"
 }

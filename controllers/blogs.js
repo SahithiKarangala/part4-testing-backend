@@ -1,15 +1,7 @@
 const blogsRouter = require('express').Router() 
 const Blog = require('../models/blogSchema')
 const User = require('../models/userSchema')
-const jwt = require('jsonwebtoken')
-
-const getTokenFrom = request => {
-    const authorization = request.get('authorization')
-    if(authorization && authorization.startsWith('Bearer ')){
-        return authorization.replace('Bearer ',"")
-    }
-    return null
-}
+const { userExtractor } = require('../utils/middleware')
 
 
 blogsRouter.get('/', async (request, response) => {
@@ -17,22 +9,16 @@ blogsRouter.get('/', async (request, response) => {
     response.json(blog)
 })
 
-blogsRouter.post('/', async (request, response,next) => {
+blogsRouter.post('/', userExtractor,async (request, response,next) => {
 
     //check if a blog already exists with the same title, if yes return 409 conflict error
   const title = request.body.title
 
-  const token = getTokenFrom(request)
-  if (!token) {
+  if (!request.token) {
     return response.status(401).send({ error: 'token missing' })
   }
 
-  const decodedToken = jwt.verify(token, process.env.SECRET)
-  if(!decodedToken.id){
-    return response.status(401).send({error: "Token missing or invalid"})
-  }
-
-  const user = await User.findById(decodedToken.id)
+  const user = request.user
   if(!user){
     return response.status(401).send({error: "User not found"})
   }
@@ -77,12 +63,23 @@ blogsRouter.post('/', async (request, response,next) => {
 
 })
 
-blogsRouter.delete('/:id',async(request,response,next)=>{
+blogsRouter.delete('/:id',userExtractor,async(request,response,next)=>{
     const id = request.params.id 
     const blog_to_delete = await Blog.findById(id)
 
     if(!blog_to_delete){
         return response.status(404).send({error: "Blog not found"})
+    }
+    if(!request.token){
+        return response.status(401).send({error:"Token missing"})
+    } 
+
+    const user = request.user
+    if(!user){
+        return response.status(401).send({error:"User not found"})
+    }
+    if(blog_to_delete.user.toString() !== user._id.toString()){
+        return response.status(403).send({error:"You are not authorized to delete this blog"})
     }
     
     await Blog.findByIdAndDelete(id)

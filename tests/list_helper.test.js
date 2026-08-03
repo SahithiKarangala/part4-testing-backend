@@ -168,9 +168,26 @@ describe('blog api', () => {
         }
     ]
 
+    let token
+
     beforeEach(async () => {
+        await User.deleteMany({})
         await Blog.deleteMany({})
-        await Blog.insertMany(initialBlogs)
+
+        const passwordHash = await bcrypt.hash('sekret', 10)
+        const user = new User({ username: 'root', name: 'Root User', passwordHash })
+        const savedUser = await user.save()
+
+        const loginResponse = await api
+            .post('/api/login')
+            .send({ username: 'root', password: 'sekret' })
+
+        token = loginResponse.body.token
+
+        await Blog.insertMany(initialBlogs.map(blog => ({
+            ...blog,
+            user: savedUser._id,
+        })))
     })
 
     test('all blogs are returned as JSON', async () => {
@@ -204,6 +221,7 @@ describe('blog api', () => {
         test('creating a new blog with existing title returns 409', async () => {
             const response = await api
                 .post('/api/blogs')
+                .set('Authorization', `Bearer ${token}`)
                 .send(newExistingBlogExample)
                 .expect(409)
 
@@ -216,6 +234,7 @@ describe('blog api', () => {
 
             const response = await api
                 .post('/api/blogs')
+                .set('Authorization', `Bearer ${token}`)
                 .send(newBlogExample)
                 .expect(201)
 
@@ -237,6 +256,7 @@ describe('blog api', () => {
 
             await api
                 .delete(`/api/blogs/${blogToDelete.id}`)
+                .set('Authorization', `Bearer ${token}`)
                 .expect(204)
 
             const blogsAtEnd = await api.get('/api/blogs')
